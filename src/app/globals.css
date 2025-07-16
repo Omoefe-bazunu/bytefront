@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: 220 16.7% 97.8%;
+    --foreground: 222 28.4% 17.8%;
+    --card: 220 16.7% 97.8%;
+    --card-foreground: 222 28.4% 17.8%;
+    --popover: 220 16.7% 97.8%;
+    --popover-foreground: 222 28.4% 17.8%;
+    --primary: 222.1 82.9% 57.8%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 222 28.4% 17.8%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 222 8.9% 53.1%;
+    --accent: 261.2 88.1% 61.8%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 222.1 82.9% 57.8%;
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 222 28.4% 17.8%;
+    --foreground: 220 16.7% 97.8%;
+    --card: 222 28.4% 17.8%;
+    --card-foreground: 220 16.7% 97.8%;
+    --popover: 222 28.4% 17.8%;
+    --popover-foreground: 220 16.7% 97.8%;
+    --primary: 222.1 82.9% 57.8%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 25.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 220 14.3% 25.9%;
+    --muted-foreground: 222 8.9% 63.1%;
+    --accent: 261.2 88.1% 61.8%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 13% 21%;
+    --input: 220 13% 21%;
+    --ring: 222.1 82.9% 57.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .btn-gradient {
+    background-image: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)));
+    color: hsl(var(--primary-foreground));
+  }
+  .btn-gradient:hover {
+    opacity: 0.9;
+    transition: opacity 0.2s ease-in-out;
+  }
+}

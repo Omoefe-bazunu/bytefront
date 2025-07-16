@@ -1,22 +1,27 @@
-
 // src/app/products/[slug]/page.tsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { notFound, useParams } from 'next/navigation';
-import Image from 'next/image';
-import { reviews as allReviews } from '@/lib/data'; // Static reviews for now
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Star, ShoppingCart, Heart, CheckCircle } from 'lucide-react';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import type { Product } from '@/lib/types';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useCart } from '@/hooks/use-cart';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { notFound, useParams } from "next/navigation";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Star, ShoppingCart, Heart, CheckCircle } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import type { Product } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCart } from "@/hooks/use-cart";
+import { useToast } from "@/hooks/use-toast";
+import { ReviewsSection } from "@/components/reviews-section";
 
 export default function ProductPage() {
   const params = useParams();
@@ -24,7 +29,7 @@ export default function ProductPage() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  
+
   const { addToCart } = useCart();
   const { toast } = useToast();
 
@@ -49,14 +54,14 @@ export default function ProductPage() {
   }, [productId]);
 
   const handleAddToCart = () => {
-      if (product) {
-          addToCart(product);
-          toast({
-              title: "Added to Cart!",
-              description: `${product.name} has been added to your cart.`
-          })
-      }
-  }
+    if (product) {
+      addToCart(product);
+      toast({
+        title: "Added to Cart!",
+        description: `${product.name} has been added to your cart.`,
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -81,8 +86,6 @@ export default function ProductPage() {
   if (!product) {
     notFound();
   }
-
-  const productReviews = allReviews.filter(r => r.productId === product.id);
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -115,26 +118,40 @@ export default function ProductPage() {
 
         {/* Product Details */}
         <div className="flex flex-col">
-          <h1 className="text-3xl lg:text-4xl font-bold font-headline">{product.name}</h1>
+          <h1 className="text-3xl lg:text-4xl font-bold font-headline">
+            {product.name}
+          </h1>
           <p className="text-lg text-muted-foreground mt-2">{product.brand}</p>
-          
+
           <div className="mt-4">
             {product.discountedPrice ? (
               <div className="flex items-baseline gap-3">
-                <p className="text-4xl font-bold text-primary">₦{product.discountedPrice.toLocaleString()}</p>
-                <p className="text-2xl text-muted-foreground line-through">₦{product.price.toLocaleString()}</p>
+                <p className="text-4xl font-bold text-primary">
+                  ₦{product.discountedPrice.toLocaleString()}
+                </p>
+                <p className="text-2xl text-muted-foreground line-through">
+                  ₦{product.price.toLocaleString()}
+                </p>
               </div>
             ) : (
-              <p className="text-4xl font-bold">₦{product.price.toLocaleString()}</p>
+              <p className="text-4xl font-bold">
+                ₦{product.price.toLocaleString()}
+              </p>
             )}
           </div>
-          
+
           <Separator className="my-6" />
 
-          <div className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{product.description}</div>
-          
+          <div className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+            {product.description}
+          </div>
+
           <div className="mt-6 flex flex-col sm:flex-row gap-4">
-            <Button size="lg" className="btn-gradient flex-1" onClick={handleAddToCart}>
+            <Button
+              size="lg"
+              className="btn-gradient flex-1"
+              onClick={handleAddToCart}
+            >
               <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
             </Button>
             <Button size="lg" variant="outline" className="flex-1">
@@ -143,16 +160,18 @@ export default function ProductPage() {
           </div>
 
           <div className="mt-6 flex items-center gap-2 text-sm text-green-600">
-            <CheckCircle className="h-5 w-5"/>
+            <CheckCircle className="h-5 w-5" />
             <span>Delivery within 2-5 working days</span>
           </div>
         </div>
       </div>
-      
+
       <div className="grid md:grid-cols-2 gap-8 lg:gap-16 mt-12">
         {/* Specifications */}
         <div>
-          <h2 className="text-2xl font-bold font-headline mb-4">Full Specifications</h2>
+          <h2 className="text-2xl font-bold font-headline mb-4">
+            Full Specifications
+          </h2>
           <Card>
             <CardContent className="p-6">
               <div className="whitespace-pre-wrap text-muted-foreground">
@@ -161,39 +180,10 @@ export default function ProductPage() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Customer Reviews */}
-        <div>
-          <h2 className="text-2xl font-bold font-headline mb-4">Customer Reviews</h2>
-          {productReviews.length > 0 ? (
-            <div className="space-y-6">
-              {productReviews.map(review => (
-                <Card key={review.id}>
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-lg font-headline">{review.author}</CardTitle>
-                      <div className="flex items-center gap-1">
-                        {[...Array(review.rating)].map((_, i) => (
-                          <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                        ))}
-                        {[...Array(5 - review.rating)].map((_, i) => (
-                           <Star key={i} className="h-5 w-5 text-muted-foreground/30" />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{review.date}</p>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="italic text-muted-foreground">"{review.comment}"</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground">No reviews for this product yet. Be the first to leave one!</p>
-          )}
-        </div>
       </div>
+
+      {/* Customer Reviews */}
+      <ReviewsSection />
     </div>
   );
 }

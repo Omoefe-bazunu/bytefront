@@ -1,4 +1,4 @@
-import type { Review, FaqItem, TrustFeature } from "@/lib/types";
+import type { FaqItem, TrustFeature } from "@/lib/types";
 import {
   ShieldCheck,
   PackageCheck,
@@ -7,53 +7,6 @@ import {
   Award,
   Headset,
 } from "lucide-react";
-
-export const reviews: Review[] = [
-  {
-    id: "rev_1",
-    productId: "prod_1",
-    author: "Tunde Adebayo",
-    rating: 5,
-    comment:
-      "This laptop is a beast! Handles my video editing projects flawlessly.",
-    date: "2023-10-15",
-  },
-  {
-    id: "rev_2",
-    productId: "prod_3",
-    author: "Chiamaka Nwosu",
-    rating: 5,
-    comment:
-      "The camera on this phone is absolutely insane. Worth every penny!",
-    date: "2023-10-12",
-  },
-  {
-    id: "rev_3",
-    productId: "prod_2",
-    author: "David Okon",
-    rating: 4,
-    comment:
-      "Great for work and travel. So light I barely notice it in my bag.",
-    date: "2023-10-10",
-  },
-  {
-    id: "rev_4",
-    productId: "prod_4",
-    author: "Fatima Bello",
-    rating: 5,
-    comment: "Amazing phone for the price. The battery lasts forever.",
-    date: "2023-10-08",
-  },
-  {
-    id: "rev_5",
-    productId: "prod_1",
-    author: "Emeka Obi",
-    rating: 4,
-    comment:
-      "Fast delivery and excellent customer service. The laptop is perfect.",
-    date: "2023-10-05",
-  },
-];
 
 export const faqItems: FaqItem[] = [
   {

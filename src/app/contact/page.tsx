@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Resend } from "resend";
+import emailjs from "@emailjs/browser"; // 👈 New import
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,6 @@ import {
 import { Mail, Phone, Clock, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { EmailTemplate } from "@/components/EmailTemplates";
 
 const ADMIN_EMAIL = "raniem57@gmail.com";
 
@@ -43,7 +42,7 @@ export default function ContactPage() {
     setLoading(true);
 
     try {
-      // Save message to Firestore
+      // 1. Save message to Firestore
       await addDoc(collection(db, "messages"), {
         name,
         email,
@@ -51,17 +50,20 @@ export default function ContactPage() {
         createdAt: serverTimestamp(),
       });
 
-      // Send email notification using Resend
-      const resend = new Resend(process.env.RESEND_PASSWORD);
-      const { error } = await resend.emails.send({
-        from: "ByteFront <info@higher.com.ng>",
-        to: [ADMIN_EMAIL],
-        subject: "New Contact Message from ByteFront",
-        react: <EmailTemplate name={name} email={email} message={message} />,
-      });
+      // 2. Send email using EmailJS
+      const templateParams = {
+        to_email: ADMIN_EMAIL,
+      };
 
-      if (error) {
-        throw new Error(error.message);
+      const result = await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+        templateParams,
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+      );
+
+      if (result.status !== 200) {
+        throw new Error("EmailJS failed");
       }
 
       toast({ title: "Success", description: "Your message has been sent!" });
@@ -69,6 +71,7 @@ export default function ContactPage() {
       setEmail("");
       setMessage("");
     } catch (error: any) {
+      console.error("Email error:", error);
       toast({
         variant: "destructive",
         title: "Error",

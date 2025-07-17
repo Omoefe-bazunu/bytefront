@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
-import { Resend } from "resend";
+import emailjs from "@emailjs/browser";
 import { v4 as uuidv4 } from "uuid";
 import {
   Dialog,
@@ -65,28 +65,28 @@ export function PaymentModal({
 
   const sendNewOrderEmail = async (orderId: string, total: number) => {
     try {
-      const resend = new Resend(process.env.RESEND_PASSWORD);
-      const { error } = await resend.emails.send({
-        from: "ByteFront <info@higher.com.ng>",
-        to: [ADMIN_EMAIL],
-        subject: `New Order Received: #${orderId.substring(0, 7)}`,
-        react: (
-          <OrderEmailTemplate
-            orderId={orderId}
-            total={total}
-            shippingInfo={shippingInfo!}
-            items={cartItems}
-            orderLink={`${window.location.origin}/admin/orders/${orderId}`}
-          />
-        ),
-      });
+      const templateParams = {
+        to_email: ADMIN_EMAIL,
+      };
 
-      if (error) {
-        throw new Error(error.message);
+      const result = await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+        templateParams,
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+      );
+
+      if (result.status !== 200) {
+        throw new Error("Failed to send email.");
       }
     } catch (error: any) {
       console.error("Failed to send email:", error);
-      throw error;
+      toast({
+        variant: "destructive",
+        title: "Email Notification Issue",
+        description:
+          "Order saved, but admin notification failed. Contact support if needed.",
+      });
     }
   };
 
@@ -110,6 +110,7 @@ export function PaymentModal({
 
     setLoading(true);
 
+    let orderRef;
     try {
       // 1. Upload receipt to Storage
       const receiptRef = ref(
@@ -120,7 +121,7 @@ export function PaymentModal({
       const receiptUrl = await getDownloadURL(receiptRef);
 
       // 2. Create order in Firestore
-      const orderRef = await addDoc(collection(db, "orders"), {
+      orderRef = await addDoc(collection(db, "orders"), {
         userId: user.uid,
         shippingInfo,
         items: cartItems,
@@ -132,29 +133,34 @@ export function PaymentModal({
         createdAt: serverTimestamp(),
       });
 
-      // 3. Send email notification
-      await sendNewOrderEmail(orderRef.id, totalAmount);
-
-      // 4. Clear cart
+      // 3. Clear cart
       clearCart();
 
-      // 5. Show success and redirect
+      // 4. Show success and redirect
       toast({
         title: "Order Placed!",
         description:
-          "We've received your order and will verify your payment shortly.",
+          "Your order has been saved. We will verify your payment and process your order.",
       });
       router.push("/");
       onClose();
     } catch (error: any) {
+      console.error("Error saving order:", error);
       toast({
         variant: "destructive",
         title: "Order Failed",
-        description: error.message || "An unexpected error occurred.",
+        description: "Failed to save order. Please try again.",
       });
-    } finally {
       setLoading(false);
+      return;
     }
+
+    // 5. Send email notification (runs independently)
+    if (orderRef) {
+      await sendNewOrderEmail(orderRef.id, totalAmount);
+    }
+
+    setLoading(false);
   };
 
   return (

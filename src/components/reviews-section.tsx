@@ -148,7 +148,7 @@ export function ReviewsSection() {
 
   return (
     <section className="w-full py-12 md:py-24 lg:py-16">
-      <div className="container px-4 md:px-6">
+      <div className="container max-w-screen-xl px-4 sm:px-6 lg:px-8 mx-auto">
         <div className="flex justify-center items-center mb-8">
           <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">
             What Our Customers Say
@@ -164,8 +164,8 @@ export function ReviewsSection() {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
+              {/* <CarouselPrevious />
+              <CarouselNext /> */}
             </Carousel>
           </div>
         ) : (

@@ -1,11 +1,9 @@
-// src/components/layout/header.tsx
 "use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, ShoppingCart, User, LogOut } from "lucide-react";
 import { signOut } from "firebase/auth";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -63,10 +61,10 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40  border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center max-w-screen-xl px-4 sm:px-6 lg:px-12 py-2">
+    <header className="sticky top-0 z-40 flex justify-evenly items-center w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 justify-center items-center max-w-screen-xl px-4 sm:px-6 lg:px-8">
         {/* Mobile Nav Trigger */}
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center">
           <Sheet>
             <SheetTrigger asChild>
               <Button
@@ -109,8 +107,8 @@ export function Header() {
         </div>
 
         {/* Desktop Logo */}
-        <div className="hidden md:flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
+        <div className="flex items-center">
+          <Link href="/" className="flex items-center space-x-2">
             <Logo className="h-6 w-6" />
             <span className="hidden font-bold sm:inline-block font-headline">
               ByteFront
@@ -127,7 +125,7 @@ export function Header() {
         </div>
 
         {/* Desktop Nav (centered) */}
-        <nav className="hidden md:flex flex-1 items-center justify-center space-x-6 text-sm font-medium">
+        <nav className="hidden md:flex flex-1 items-center justify-center gap-8 text-sm font-medium">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -145,7 +143,7 @@ export function Header() {
         </nav>
 
         {/* Right side icons */}
-        <div className="flex items-center justify-end space-x-1 w-auto">
+        <div className="flex items-center space-x-2">
           <Link href="/cart">
             <Button variant="ghost" size="icon">
               <ShoppingCart className="h-5 w-5" />

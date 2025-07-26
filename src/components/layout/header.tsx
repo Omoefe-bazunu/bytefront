@@ -109,7 +109,7 @@ export function Header() {
         {/* Desktop Logo */}
         <div className="flex items-center">
           <Link href="/" className="flex items-center space-x-2">
-            <Logo className="h-6 w-6" />
+            <Logo className="h-6 w-6 hidden sm:inline-block" />
             <span className="hidden font-bold sm:inline-block font-headline">
               ByteFront
             </span>

@@ -5,6 +5,7 @@ interface FaqAccordionProps {
   items: FaqItem[];
 }
 
+
 export function FaqAccordion({ items }: FaqAccordionProps) {
   return (
     <Accordion type="single" collapsible className="w-full">

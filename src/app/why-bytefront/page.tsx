@@ -72,23 +72,24 @@ export default function WhyBytefrontPage() {
         </div>
 
         <div className="mt-16 text-center ">
-          <h3 className="text-2xl font-semibold font-headline mb-4">
+          <h3 className="text-2xl font-semibold font-headline mb-6">
             Our Unwavering Promise
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 justify-center items-center">
-            <div className="flex items-center gap-2 font-medium text-muted-foreground justify-center">
-              <ShieldCheck className="h-6 w-6 text-green-500" /> Verified
-              Importers
+            <div className="flex items-center gap-2 flex-col justify-center text-sm font-medium text-muted-foreground">
+              <ShieldCheck className="h-5 w-5 text-green-500" />{" "}
+              <p>Verified Importers</p>
             </div>
-            <div className="flex items-center gap-2 font-medium text-muted-foreground justify-center">
-              <Lock className="h-6 w-6 text-green-500" /> Secure Checkout
+            <div className="flex items-center gap-2 flex-col justify-center text-sm font-medium text-muted-foreground">
+              <Lock className="h-5 w-5 text-green-500" /> <p>Secure Checkout</p>
             </div>
-            <div className="flex items-center gap-2 font-medium text-muted-foreground justify-center">
-              <Truck className="h-6 w-6 text-green-500" /> Fast Nationwide
-              Delivery
+            <div className="flex items-center flex-col gap-2 justify-center text-sm font-medium text-muted-foreground">
+              <Truck className="h-5 w-5 text-green-500" />{" "}
+              <p>Fast Nationwide Delivery</p>
             </div>
-            <div className="flex items-center gap-2 font-medium text-muted-foreground justify-center">
-              <Headset className="h-6 w-6 text-green-500" /> Customer Support
+            <div className="flex items-center gap-2 flex-col justify-center text-sm font-medium text-muted-foreground">
+              <Headset className="h-5 w-5 text-green-500" />{" "}
+              <p>Customer Support</p>
             </div>
           </div>
         </div>

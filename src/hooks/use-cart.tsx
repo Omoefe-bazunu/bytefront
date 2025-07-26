@@ -74,7 +74,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     const price = item.discountedPrice ?? item.price;
     return acc + price * item.quantity;
   }, 0);
-  const shipping = cartItems.length > 0 ? 7000 : 0;
+  const shipping = cartItems.length > 0 ? 4000 : 0;
   const total = subtotal + shipping;
 
   // Immediate save to Firestore

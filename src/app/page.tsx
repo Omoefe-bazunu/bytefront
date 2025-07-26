@@ -244,7 +244,7 @@ export default function Home() {
     <div className="flex flex-col min-h-dvh w-full">
       <main className="flex-1 w-full">
         {/* Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-secondary ">
+        <section className="w-full py-12 md:py-24 lg:py-30 bg-secondary ">
           <div className="container max-w-screen-xl px-4 sm:px-6 lg:px-8 mx-auto ">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
               <div className="flex flex-col justify-center lg:items-start items-center space-y-4">
@@ -421,19 +421,21 @@ export default function Home() {
               ))}
             </div>
             <div className="mx-auto max-w-screen-xl grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-              <div className="flex items-center gap-2 justify-center text-sm font-medium text-muted-foreground">
-                <ShieldCheck className="h-5 w-5 text-green-500" /> Verified
-                Importers
+              <div className="flex items-center gap-2 flex-col justify-center text-sm font-medium text-muted-foreground">
+                <ShieldCheck className="h-5 w-5 text-green-500" />{" "}
+                <p>Verified Importers</p>
               </div>
-              <div className="flex items-center gap-2 justify-center text-sm font-medium text-muted-foreground">
-                <Lock className="h-5 w-5 text-green-500" /> Secure Checkout
+              <div className="flex items-center gap-2 flex-col justify-center text-sm font-medium text-muted-foreground">
+                <Lock className="h-5 w-5 text-green-500" />{" "}
+                <p>Secure Checkout</p>
               </div>
-              <div className="flex items-center gap-2 justify-center text-sm font-medium text-muted-foreground">
-                <Truck className="h-5 w-5 text-green-500" /> Fast Nationwide
-                Delivery
+              <div className="flex items-center flex-col gap-2 justify-center text-sm font-medium text-muted-foreground">
+                <Truck className="h-5 w-5 text-green-500" />{" "}
+                <p>Fast Nationwide Delivery</p>
               </div>
-              <div className="flex items-center gap-2 justify-center text-sm font-medium text-muted-foreground">
-                <Headset className="h-5 w-5 text-green-500" /> Customer Support
+              <div className="flex items-center gap-2 flex-col justify-center text-sm font-medium text-muted-foreground">
+                <Headset className="h-5 w-5 text-green-500" />{" "}
+                <p>Customer Support</p>
               </div>
             </div>
             <div className="text-center mt-8">

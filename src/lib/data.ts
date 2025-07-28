@@ -30,11 +30,11 @@ export const faqItems: FaqItem[] = [
       "We currently do not offer pay-on-delivery. We accept secure online payments transfer to our Parent Company Account (HIGH-ER ENTERPRISES) to ensure your transaction is safe. You can always query a transaction from on our contact page or via WhatsApp. We will be sure to respond within 24 hours.",
   },
 
-  {
-    question: "How can I join the affiliate program?",
-    answer:
-      "Simply navigate to our affiliate page, fill out the sign-up form, and you'll get a unique referral link to start earning commissions from your referrals.",
-  },
+  // {
+  //   question: "How can I join the affiliate program?",
+  //   answer:
+  //     "Simply navigate to our affiliate page, fill out the sign-up form, and you'll get a unique referral link to start earning commissions from your referrals.",
+  // },
   {
     question: "How do I contact ByteFront?",
     answer:

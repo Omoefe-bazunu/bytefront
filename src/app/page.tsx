@@ -66,6 +66,21 @@ export default function Home() {
     productId: "",
   });
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [email, setEmail] = useState("");
+  const [specs, setSpecs] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const message = `New request from ${email}:\n${specs}`;
+    const whatsappUrl = `https://wa.me/+2349043970401?text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappUrl, "_blank");
+    setEmail("");
+    setSpecs("");
+    setLoading(false);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -469,7 +484,7 @@ export default function Home() {
         </section>
 
         {/* Affiliate Program CTA */}
-        <section className="w-full py-12 md:py-24 lg:py-16">
+        {/* <section className="w-full py-12 md:py-24 lg:py-16 hidden">
           <div className="container max-w-screen-xl px-4 sm:px-6 lg:px-8 mx-auto">
             <div className="grid items-center justify-center gap-4 text-center">
               <div className="space-y-3">
@@ -487,6 +502,46 @@ export default function Home() {
                     Become an Affiliate <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
+              </div>
+            </div>
+          </div>
+        </section> */}
+        <section className="w-full py-12 md:py-24 lg:py-16">
+          <div className="container max-w-screen-xl px-4 sm:px-6 lg:px-8 mx-auto">
+            <div className="grid items-center justify-center gap-4 text-center">
+              <div className="space-y-3">
+                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight font-headline">
+                  Can't find what you're looking for?
+                </h2>
+                <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Send us the exact specs you need, and we'll help you source
+                  the perfect product.
+                </p>
+              </div>
+              <div className="mx-auto w-full max-w-sm space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <Input
+                    type="email"
+                    placeholder="Your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                  <Textarea
+                    placeholder="Enter the exact specs you need..."
+                    value={specs}
+                    onChange={(e) => setSpecs(e.target.value)}
+                    required
+                    className="min-h-[100px]"
+                  />
+                  <Button
+                    type="submit"
+                    className="btn-gradient w-full"
+                    disabled={loading}
+                  >
+                    {loading ? "Sending..." : "Submit Request"}
+                  </Button>
+                </form>
               </div>
             </div>
           </div>

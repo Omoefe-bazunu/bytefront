@@ -32,7 +32,7 @@ const navLinks = [
   { href: "/why-bytefront", label: "Why Us" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
-  { href: "/affiliate", label: "Affiliate" },
+  // { href: "/affiliate", label: "Affiliate" },
 ];
 
 const ADMIN_EMAIL = "raniem57@gmail.com";

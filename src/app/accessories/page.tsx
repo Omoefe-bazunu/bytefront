@@ -27,7 +27,7 @@ export default function SmartphonesPage() {
       setLoading(true);
       const q = query(
         collection(db, "products"),
-        where("category", "==", "Smartphones")
+        where("category", "==", "Accessories")
       );
       const querySnapshot = await getDocs(q);
       const smartphoneProducts = querySnapshot.docs.map(
@@ -107,10 +107,10 @@ export default function SmartphonesPage() {
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-xl py-12 md:py-20">
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold font-headline tracking-tight">
-          Smartphones
+          Accessories
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Discover the latest in mobile technology from top brands.
+          Get the best accessories for your devices.
         </p>
       </div>
 

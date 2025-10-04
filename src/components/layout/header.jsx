@@ -1,10 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, ShoppingCart, User, LogOut } from "lucide-react";
 import { signOut } from "firebase/auth";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -13,9 +13,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Logo } from "@/components/icons";
-import { useAuth } from "@/hooks/use-auth";
-import { auth } from "@/lib/firebase";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,24 +21,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { auth } from "@/lib/firebase";
+import { cn } from "@/lib/utils";
 
 const navLinks = [
+  { href: "/", label: "Home" },
   { href: "/laptops", label: "Laptops" },
-  { href: "/smartphones", label: "Smartphones" },
+  { href: "/accessories", label: "Accessories" },
   { href: "/why-bytefront", label: "Why Us" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
-  // { href: "/affiliate", label: "Affiliate" },
 ];
 
 const ADMIN_EMAIL = "raniem57@gmail.com";
 
-export function Header() {
+export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading } = useAuth();
   const { toast } = useToast();
+
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -61,17 +71,18 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex justify-evenly items-center w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header
+      className={cn(
+        "sticky top-0 z-40 flex justify-evenly items-center w-full border-b backdrop-blur transition-all duration-300",
+        scrolled ? "bg-white text-blue-900" : "bg-blue-900 text-white"
+      )}
+    >
       <div className="container flex h-16 justify-center items-center max-w-screen-xl px-4 sm:px-6 lg:px-8">
         {/* Mobile Nav Trigger */}
         <div className="md:hidden flex items-center">
           <Sheet>
             <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="inline-flex items-center justify-center rounded-md"
-              >
+              <Button variant="ghost" size="icon" className="rounded-md">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>
@@ -80,7 +91,6 @@ export function Header() {
               <SheetHeader className="px-7">
                 <SheetTitle className="sr-only">Menu</SheetTitle>
                 <Link href="/" className="flex items-center">
-                  <Logo className="mr-2 h-6 w-6" />
                   <span className="font-bold font-headline">ByteFront</span>
                 </Link>
               </SheetHeader>
@@ -93,8 +103,12 @@ export function Header() {
                       className={cn(
                         "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted",
                         pathname === link.href
-                          ? "bg-accent text-accent-foreground"
-                          : "text-muted-foreground"
+                          ? scrolled
+                            ? "text-blue-900"
+                            : "text-white"
+                          : scrolled
+                            ? "text-blue-900/70"
+                            : "text-white/70"
                       )}
                     >
                       {link.label}
@@ -109,32 +123,27 @@ export function Header() {
         {/* Desktop Logo */}
         <div className="flex items-center">
           <Link href="/" className="flex items-center space-x-2">
-            <Logo className="h-6 w-6 hidden sm:inline-block" />
-            <span className="hidden font-bold sm:inline-block font-headline">
+            <span className="hidden sm:inline-block font-bold font-headline">
               ByteFront
             </span>
           </Link>
         </div>
 
-        {/* Mobile Logo (centered) */}
-        <div className="flex-1 flex justify-center md:hidden">
-          <Link href="/" className="flex items-center space-x-2">
-            <Logo className="h-6 w-6" />
-            <span className="font-bold font-headline">ByteFront</span>
-          </Link>
-        </div>
-
-        {/* Desktop Nav (centered) */}
+        {/* Desktop Nav */}
         <nav className="hidden md:flex flex-1 items-center justify-center gap-8 text-sm font-medium">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "transition-colors hover:text-foreground/80",
+                "transition-colors",
                 pathname === link.href
-                  ? "text-foreground"
-                  : "text-foreground/60"
+                  ? scrolled
+                    ? "text-blue-900"
+                    : "text-white"
+                  : scrolled
+                    ? "text-blue-900/70 hover:text-blue-900"
+                    : "text-white/70 hover:text-white"
               )}
             >
               {link.label}

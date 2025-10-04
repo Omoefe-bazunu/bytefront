@@ -9,7 +9,7 @@ export default function WhyBytefrontPage() {
     <div className="bg-secondary">
       <div className="container mx-auto px-4 py-12 md:py-20">
         <div className="text-center max-w-3xl mx-auto">
-          <p className="text-primary font-semibold font-headline">
+          <p className="text-blue-900 font-semibold font-headline">
             Why ByteFront?
           </p>
           <h1 className="text-4xl md:text-6xl font-bold font-headline tracking-tight mt-2">

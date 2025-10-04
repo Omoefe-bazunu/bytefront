@@ -282,13 +282,13 @@ export default function Home() {
                       Shop Laptops <Laptop className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
-                  <Link href="/smartphones">
+                  <Link href="/accessories">
                     <Button
                       size="lg"
                       variant="outline"
                       className="w-full min-[400px]:w-auto"
                     >
-                      Shop Phones <Smartphone className="ml-2 h-5 w-5" />
+                      Shop Accessories <Smartphone className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
                 </div>
@@ -306,19 +306,20 @@ export default function Home() {
         </section>
 
         {/* Featured Products Slider */}
-        <section className="w-full py-12 md:py-24 lg:py-16">
+        <section className="w-full bg-blue-900 text-white py-12 md:py-24 lg:py-16">
           <div className="container max-w-screen-xl px-4 sm:px-6 lg:px-8 mx-auto">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">
                   Top Deals
                 </h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                <p className="max-w-[900px] text-blue-100 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                   Check out our featured products. Hand-picked for quality and
                   value.
                 </p>
               </div>
             </div>
+
             {loading ? (
               <ProductCarouselSkeleton />
             ) : (
@@ -339,8 +340,6 @@ export default function Home() {
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  {/* <CarouselPrevious />
-                  <CarouselNext /> */}
                 </Carousel>
               </div>
             )}
@@ -377,12 +376,12 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Smartphones Section */}
-        <section id="smartphones" className="w-full py-12 md:py-24 lg:py-16">
+        {/* Accessories Section */}
+        <section id="accessories" className="w-full py-12 md:py-24 lg:py-16">
           <div className="container max-w-screen-xl px-4 sm:px-6 lg:px-8 mx-auto">
             <div className="flex items-center justify-center mb-8">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">
-                Smartphones
+                Accessories
               </h2>
             </div>
             {loading ? (
@@ -395,9 +394,9 @@ export default function Home() {
               </div>
             )}
             <div className="text-center mt-12">
-              <Link href="/smartphones">
+              <Link href="/accessories">
                 <Button variant="outline">
-                  View All Smartphones <ArrowRight className="ml-2 h-4 w-4" />
+                  View All Accessories <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>

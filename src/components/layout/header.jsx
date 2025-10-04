@@ -42,12 +42,13 @@ export default function Header() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const { toast } = useToast();
-
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      if (window.innerWidth >= 768) {
+        setScrolled(window.scrollY > 50);
+      }
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -61,7 +62,7 @@ export default function Header() {
         description: "You have been successfully logged out.",
       });
       router.push("/");
-    } catch (error) {
+    } catch {
       toast({
         variant: "destructive",
         title: "Logout Failed",
@@ -73,63 +74,153 @@ export default function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 flex justify-evenly items-center w-full border-b backdrop-blur transition-all duration-300",
+        "sticky top-0 z-40 flex justify-center w-full border-b backdrop-blur transition-all duration-300",
         scrolled ? "bg-white text-blue-900" : "bg-blue-900 text-white"
       )}
     >
-      <div className="container flex h-16 justify-center items-center max-w-screen-xl px-4 sm:px-6 lg:px-8">
-        {/* Mobile Nav Trigger */}
+      <div className="container flex h-16 justify-between items-center max-w-screen-xl px-4 sm:px-6 lg:px-8">
+        {/* ✅ Logo always visible (left) */}
+        <Link href="/" className="text-lg sm:text-xl font-bold font-headline">
+          ByteFront
+        </Link>
+
+        {/* ✅ Mobile Menu (cart & user inside) */}
         <div className="md:hidden flex items-center">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-md">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-md text-white"
+              >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="pl-1 pr-0 pt-9">
+
+            <SheetContent
+              side="right"
+              className="pl-1 pr-0 pt-9 bg-blue-900 text-white"
+            >
               <SheetHeader className="px-7">
                 <SheetTitle className="sr-only">Menu</SheetTitle>
-                <Link href="/" className="flex items-center">
-                  <span className="font-bold font-headline">ByteFront</span>
-                </Link>
               </SheetHeader>
-              <div className="flex flex-col h-full">
-                <nav className="mt-8 flex flex-col gap-2 px-4">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={cn(
-                        "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted",
-                        pathname === link.href
-                          ? scrolled
-                            ? "text-blue-900"
-                            : "text-white"
-                          : scrolled
-                            ? "text-blue-900/70"
-                            : "text-white/70"
-                      )}
-                    >
-                      {link.label}
+
+              <div className="flex flex-col h-full justify-between">
+                <div>
+                  <nav className="mt-4 flex flex-col gap-2 px-4">
+                    {navLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className={cn(
+                          "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-blue-800",
+                          pathname === link.href
+                            ? "text-white font-semibold"
+                            : "text-blue-100"
+                        )}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </nav>
+
+                  {/* ✅ Cart and User Dropdown inside mobile menu */}
+                  <div className="mt-8 flex flex-col gap-4 px-4 border-t border-blue-800 pt-4">
+                    <Link href="/cart">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex items-center gap-2 text-white hover:bg-blue-800 w-full justify-start"
+                      >
+                        <ShoppingCart className="h-5 w-5" />
+                        Cart
+                      </Button>
                     </Link>
-                  ))}
-                </nav>
+
+                    {!loading && (
+                      <>
+                        {user ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="flex items-center gap-2 text-white hover:bg-blue-800 w-full justify-start"
+                              >
+                                <User className="h-5 w-5" />
+                                My Account
+                              </Button>
+                            </DropdownMenuTrigger>
+
+                            <DropdownMenuContent
+                              align="start"
+                              className="w-56 bg-white text-blue-900"
+                            >
+                              <DropdownMenuLabel className="font-normal">
+                                <div className="flex flex-col space-y-1">
+                                  <p className="text-sm font-medium leading-none">
+                                    My Account
+                                  </p>
+                                  <p className="text-xs leading-none text-muted-foreground truncate">
+                                    {user.email}
+                                  </p>
+                                </div>
+                              </DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem asChild>
+                                <Link href="/orders">Orders</Link>
+                              </DropdownMenuItem>
+                              {user.email === ADMIN_EMAIL && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem asChild>
+                                    <Link href="/admin">Admin Panel</Link>
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={handleLogout}
+                                className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                              >
+                                <LogOut className="mr-2 h-4 w-4" />
+                                Log out
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : (
+                          <>
+                            <Link href="/login">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-white text-white hover:bg-blue-800 w-full"
+                              >
+                                Log In
+                              </Button>
+                            </Link>
+                            <Link href="/signup">
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                className="bg-white text-blue-900 hover:bg-blue-100 w-full"
+                              >
+                                Sign Up
+                              </Button>
+                            </Link>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             </SheetContent>
           </Sheet>
         </div>
 
-        {/* Desktop Logo */}
-        <div className="flex items-center">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="hidden sm:inline-block font-bold font-headline">
-              ByteFront
-            </span>
-          </Link>
-        </div>
-
-        {/* Desktop Nav */}
+        {/* ✅ Desktop Nav */}
         <nav className="hidden md:flex flex-1 items-center justify-center gap-8 text-sm font-medium">
           {navLinks.map((link) => (
             <Link
@@ -151,8 +242,8 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* Right side icons */}
-        <div className="flex items-center space-x-2">
+        {/* ✅ Desktop Right Icons */}
+        <div className="hidden md:flex items-center space-x-2">
           <Link href="/cart">
             <Button variant="ghost" size="icon">
               <ShoppingCart className="h-5 w-5" />
@@ -186,18 +277,20 @@ export default function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/orders">Orders</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                   {user.email === ADMIN_EMAIL && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin">Admin Panel</Link>
-                    </DropdownMenuItem>
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin">Admin Panel</Link>
+                      </DropdownMenuItem>
+                    </>
                   )}
                   <DropdownMenuItem
                     onClick={handleLogout}
                     className="text-destructive focus:text-destructive focus:bg-destructive/10"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
+                    Log out
                   </DropdownMenuItem>
                 </>
               ) : (

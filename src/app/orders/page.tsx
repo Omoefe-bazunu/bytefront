@@ -59,7 +59,7 @@ export default function UserOrders() {
               total: doc.data().total || 0,
               status: doc.data().status || "pending",
               createdAt: doc.data().createdAt || { seconds: 0, nanoseconds: 0 },
-            } as Order)
+            }) as Order
         );
         setOrders(ordersData);
       } catch (error) {
@@ -143,7 +143,7 @@ export default function UserOrders() {
         ) : (
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-4">No orders found</p>
-            <Link href="/products">
+            <Link href="/">
               <Button>Browse Products</Button>
             </Link>
           </div>

@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
-import emailjs from "@emailjs/browser";
 import { v4 as uuidv4 } from "uuid";
 import {
   Dialog,
@@ -22,7 +21,6 @@ import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2, Copy } from "lucide-react";
 import type { ShippingInfo } from "@/app/checkout/page";
-import { OrderEmailTemplate } from "@/components/OrderEmailTemplate";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -31,13 +29,18 @@ interface PaymentModalProps {
   shippingInfo: ShippingInfo | null;
 }
 
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
 const ACCOUNT_DETAILS = {
   bank: "Kuda Microfinance Bank",
   name: "HIGH-ER ENTERPRISES",
   number: "3002638291",
 };
-
-const ADMIN_EMAIL = "raniem57@gmail.com";
 
 export function PaymentModal({
   isOpen,
@@ -57,35 +60,43 @@ export function PaymentModal({
     toast({ title: "Copied!", description: `${text} copied to clipboard.` });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setReceiptFile(e.target.files[0]);
     }
   };
 
-  const sendNewOrderEmail = async (orderId: string, total: number) => {
+  // ✅ Use Resend API route to send order emails
+  const sendNewOrderEmail = async (
+    orderId: string,
+    totalAmount: number,
+    receiptUrl: string,
+    shippingInfo: ShippingInfo,
+    cartItems: CartItem[]
+  ) => {
     try {
-      const templateParams = {
-        to_email: ADMIN_EMAIL,
-      };
+      const response = await fetch("/api/send-order-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          totalAmount,
+          userEmail: user?.email,
+          customerName: user?.displayName || shippingInfo?.fullName,
+          paymentReceiptUrl: receiptUrl,
+          shippingInfo,
+          cartItems,
+        }),
+      });
 
-      const result = await emailjs.send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
-        templateParams,
-        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
-      );
-
-      if (result.status !== 200) {
-        throw new Error("Failed to send email.");
-      }
-    } catch (error: any) {
-      console.error("Failed to send email:", error);
+      if (!response.ok) throw new Error("Failed to send order email");
+    } catch (error) {
+      console.error("Email error:", error);
       toast({
         variant: "destructive",
-        title: "Email Notification Issue",
+        title: "Email Notification Failed",
         description:
-          "Order saved, but admin notification failed. Contact support if needed.",
+          "Your order was saved, but we couldn't notify the admin automatically.",
       });
     }
   };
@@ -99,6 +110,7 @@ export function PaymentModal({
       });
       return;
     }
+
     if (!user || !shippingInfo) {
       toast({
         variant: "destructive",
@@ -110,9 +122,8 @@ export function PaymentModal({
 
     setLoading(true);
 
-    let orderRef;
     try {
-      // 1. Upload receipt to Storage
+      // 1. Upload receipt to Firebase Storage
       const receiptRef = ref(
         storage,
         `receipts/${user.uid}/${uuidv4()}-${receiptFile.name}`
@@ -121,7 +132,7 @@ export function PaymentModal({
       const receiptUrl = await getDownloadURL(receiptRef);
 
       // 2. Create order in Firestore
-      orderRef = await addDoc(collection(db, "orders"), {
+      const orderRef = await addDoc(collection(db, "orders"), {
         userId: user.uid,
         shippingInfo,
         items: cartItems,
@@ -133,10 +144,17 @@ export function PaymentModal({
         createdAt: serverTimestamp(),
       });
 
-      // 3. Clear cart
-      clearCart();
+      // 3. Send order email via Resend API route
+      await sendNewOrderEmail(
+        orderRef.id,
+        totalAmount,
+        receiptUrl,
+        shippingInfo,
+        cartItems
+      );
 
-      // 4. Show success and redirect
+      // 4. Clear cart & notify user
+      clearCart();
       toast({
         title: "Order Placed!",
         description:
@@ -144,23 +162,16 @@ export function PaymentModal({
       });
       router.push("/");
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error saving order:", error);
       toast({
         variant: "destructive",
         title: "Order Failed",
         description: "Failed to save order. Please try again.",
       });
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // 5. Send email notification (runs independently)
-    if (orderRef) {
-      await sendNewOrderEmail(orderRef.id, totalAmount);
-    }
-
-    setLoading(false);
   };
 
   return (
@@ -175,49 +186,33 @@ export function PaymentModal({
             receipt.
           </DialogDescription>
         </DialogHeader>
+
         <div className="space-y-4 py-4">
+          {/* BANK DETAILS */}
           <div className="p-4 rounded-lg bg-secondary border space-y-3">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm text-muted-foreground">Bank Name</p>
-                <p className="font-semibold">{ACCOUNT_DETAILS.bank}</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleCopy(ACCOUNT_DETAILS.bank)}
+            {[
+              { label: "Bank Name", value: ACCOUNT_DETAILS.bank },
+              { label: "Account Name", value: ACCOUNT_DETAILS.name },
+              { label: "Account Number", value: ACCOUNT_DETAILS.number },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="flex justify-between items-center border-b last:border-none pb-2"
               >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm text-muted-foreground">Account Name</p>
-                <p className="font-semibold">{ACCOUNT_DETAILS.name}</p>
+                <div>
+                  <p className="text-sm text-muted-foreground">{item.label}</p>
+                  <p className="font-semibold text-lg">{item.value}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleCopy(item.value)}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleCopy(ACCOUNT_DETAILS.name)}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm text-muted-foreground">Account Number</p>
-                <p className="font-semibold text-lg">
-                  {ACCOUNT_DETAILS.number}
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleCopy(ACCOUNT_DETAILS.number)}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
+            ))}
+
             <div className="flex justify-between items-center pt-2 border-t mt-3">
               <div>
                 <p className="text-sm text-muted-foreground">Amount to Pay</p>
@@ -228,6 +223,7 @@ export function PaymentModal({
             </div>
           </div>
 
+          {/* RECEIPT UPLOAD */}
           <div className="space-y-2">
             <Label htmlFor="receipt">Upload Payment Receipt</Label>
             <Input
@@ -243,6 +239,8 @@ export function PaymentModal({
             )}
           </div>
         </div>
+
+        {/* SUBMIT BUTTON */}
         <Button
           onClick={handleSubmit}
           disabled={loading || !receiptFile}

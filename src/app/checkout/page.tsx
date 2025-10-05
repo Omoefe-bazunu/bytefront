@@ -1,7 +1,7 @@
 // src/app/checkout/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -61,8 +61,13 @@ export default function CheckoutPage() {
     setIsModalOpen(true);
   };
 
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      router.push("/");
+    }
+  }, [cartItems, router]);
+
   if (cartItems.length === 0) {
-    router.push("/");
     return null;
   }
 

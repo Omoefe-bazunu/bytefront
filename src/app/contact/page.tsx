@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import emailjs from "@emailjs/browser"; // 👈 New import
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,8 +17,6 @@ import {
 import { Mail, Phone, Clock, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-
-const ADMIN_EMAIL = "raniem57@gmail.com";
 
 export default function ContactPage() {
   const { toast } = useToast();
@@ -50,20 +47,15 @@ export default function ContactPage() {
         createdAt: serverTimestamp(),
       });
 
-      // 2. Send email using EmailJS
-      const templateParams = {
-        to_email: ADMIN_EMAIL,
-      };
+      // 2. Send email via Resend API route
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
 
-      const result = await emailjs.send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
-        templateParams,
-        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
-      );
-
-      if (result.status !== 200) {
-        throw new Error("EmailJS failed");
+      if (!res.ok) {
+        throw new Error("Failed to send email");
       }
 
       toast({ title: "Success", description: "Your message has been sent!" });
@@ -166,7 +158,7 @@ export default function ContactPage() {
                   For support, sales, and inquiries.
                 </p>
                 <a
-                  href="mailto:support@bytefront.com"
+                  href="mailto:info@higher.com.ng"
                   className="text-primary hover:underline"
                 >
                   info@higher.com.ng

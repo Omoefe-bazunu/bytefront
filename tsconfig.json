@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -15,7 +11,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "incremental": true,
     "plugins": [
       {
@@ -23,9 +19,7 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     }
   },
   "include": [
@@ -37,9 +31,16 @@
     "src/app/why-bytefront/page.jsx",
     "src/app/contact/page.jsx",
     "src/app/page.jsx",
-    ".next/dev/types/**/*.ts"
+    "src/app/orders/[id]/page.jsx",
+    "src/app/orders/page.jsx",
+    "src/app/accessories/page.jsx",
+    "src/app/laptops/page.jsx",
+    "src/components/reviews-section.jsx",
+    "src/components/payment-modal.jsx",
+    "src/app/checkout/page.jsx",
+    "src/components/product-card.jsx",
+    "src/app/signup/page.jsx",
+    "src/app/admin/orders/[id]/page.jsx"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

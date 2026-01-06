@@ -57,15 +57,15 @@ export default function SignupPage() {
     try {
       await createUserWithEmailAndPassword(auth, values.email, values.password);
       toast({
-        title: "Identity Registered",
-        description: "New user node established successfully.",
+        title: "Registration Successful",
+        description: "Account created successfully.",
       });
       router.push("/cart");
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Registration Failed",
-        description: error.message || "System error during identity creation.",
+        description: error.message || "System error during account creation.",
       });
     } finally {
       setLoading(false);
@@ -103,7 +103,7 @@ export default function SignupPage() {
                 render={({ field }) => (
                   <FormItem className="space-y-1">
                     <FormLabel className="text-[10px] uppercase font-black text-zinc-600 tracking-widest">
-                      Assign Email
+                      Email Address
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -124,7 +124,7 @@ export default function SignupPage() {
                 render={({ field }) => (
                   <FormItem className="space-y-1">
                     <FormLabel className="text-[10px] uppercase font-black text-zinc-600 tracking-widest">
-                      Establish Access Key
+                      Secure Password
                     </FormLabel>
                     <FormControl>
                       <div className="relative">

@@ -52,7 +52,8 @@ export default function Header() {
   const { cartItems } = useCart();
   const { toast } = useToast();
   const [scrolled, setScrolled] = useState(false);
-  const [showProfileDetails, setShowProfileDetails] = useState(false); // ✅ State for mobile toggle
+  const [showProfileDetails, setShowProfileDetails] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false); // ✅ Added state to control mobile menu
 
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -65,6 +66,7 @@ export default function Header() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      setIsSheetOpen(false); // ✅ Close menu on logout
       toast({
         title: "Session Terminated",
         description: "Securely logged out of Bytefront.",
@@ -112,7 +114,9 @@ export default function Header() {
               )}
             </Button>
           </Link>
-          <Sheet>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            {" "}
+            {/* ✅ Controlled Sheet */}
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="text-zinc-400">
                 <Menu className="h-6 w-6" />
@@ -134,6 +138,7 @@ export default function Header() {
                     <Link
                       key={link.href}
                       href={link.href}
+                      onClick={() => setIsSheetOpen(false)} // ✅ Close on click
                       className={cn(
                         "px-6 py-5 text-sm uppercase tracking-widest border-b border-zinc-900 transition-colors",
                         pathname === link.href
@@ -182,6 +187,7 @@ export default function Header() {
                             <div className="flex flex-col gap-4">
                               <Link
                                 href="/orders"
+                                onClick={() => setIsSheetOpen(false)} // ✅ Close on click
                                 className="text-xs uppercase tracking-tighter text-zinc-400 hover:text-[#FF6B00]"
                               >
                                 Orders
@@ -190,6 +196,7 @@ export default function Header() {
                               {user.email === ADMIN_EMAIL && (
                                 <Link
                                   href="/admin"
+                                  onClick={() => setIsSheetOpen(false)} // ✅ Close on click
                                   className="text-xs uppercase tracking-tighter text-[#FF6B00]"
                                 >
                                   System Control
@@ -205,9 +212,11 @@ export default function Header() {
 
                 <div className="mt-auto p-6 flex flex-col gap-3">
                   {!user ? (
-                    <Link href="/login" className="w-full">
+                    <Link href="/login" onClick={() => setIsSheetOpen(false)}>
+                      {" "}
+                      {/* ✅ Close on click */}
                       <Button className="w-full bg-white text-black hover:bg-[#FF6B00] hover:text-white transition-colors rounded-none font-bold tracking-widest uppercase text-xs">
-                        Establish Identity
+                        Sign In
                       </Button>
                     </Link>
                   ) : (
@@ -252,6 +261,7 @@ export default function Header() {
               className="text-zinc-400 hover:text-[#FF6B00] hover:bg-zinc-900 rounded-none relative"
             >
               <ShoppingCart className="h-4 w-4" />
+              {/* ✅ Desktop Cart Indicator */}
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-[#FF6B00] text-black text-[9px] font-black h-4 w-4 flex items-center justify-center border border-black leading-none">
                   {cartCount}
@@ -318,7 +328,7 @@ export default function Header() {
                       onClick={handleLogout}
                       className="text-red-500 focus:bg-red-950/40 focus:text-red-400 rounded-none cursor-pointer text-xs uppercase tracking-tighter py-2"
                     >
-                      <LogOut className="mr-2 h-3 w-3" /> Terminate
+                      <LogOut className="mr-2 h-3 w-3" /> Logout
                     </DropdownMenuItem>
                   </div>
                 </>

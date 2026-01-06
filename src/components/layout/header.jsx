@@ -3,7 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, ShoppingCart, User, LogOut } from "lucide-react";
+import {
+  Menu,
+  ShoppingCart,
+  User,
+  LogOut,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { signOut } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { useCart } from "@/hooks/use-cart"; // ✅ Added useCart
+import { useCart } from "@/hooks/use-cart";
 import { auth } from "@/lib/firebase";
 import { cn } from "@/lib/utils";
 
@@ -42,11 +49,11 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading } = useAuth();
-  const { cartItems } = useCart(); // ✅ Get cart items
+  const { cartItems } = useCart();
   const { toast } = useToast();
   const [scrolled, setScrolled] = useState(false);
+  const [showProfileDetails, setShowProfileDetails] = useState(false); // ✅ State for mobile toggle
 
-  // Calculate total items in cart
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   useEffect(() => {
@@ -82,9 +89,9 @@ export default function Header() {
       )}
     >
       <div className="container flex h-12 justify-between items-center max-w-screen-xl px-4 sm:px-6 lg:px-8">
-        {/* Logo - Bricolage Grotesque */}
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <span className="font-display text-xl font-extrabold tracking-tighter text-white ">
+          <span className="font-display text-xl font-extrabold tracking-tighter text-white">
             Bytefront
           </span>
         </Link>
@@ -98,7 +105,6 @@ export default function Header() {
               className="text-zinc-400 relative"
             >
               <ShoppingCart className="h-5 w-5" />
-              {/* ✅ Mobile Cart Indicator */}
               {cartCount > 0 && (
                 <span className="absolute top-0 right-0 bg-[#FF6B00] text-black text-[9px] font-black h-4 w-4 flex items-center justify-center border border-black leading-none">
                   {cartCount}
@@ -114,7 +120,7 @@ export default function Header() {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="bg-black border-l border-zinc-800 text-white w-full p-0 rounded-none"
+              className="bg-black border-l border-zinc-800 text-white w-full p-0 rounded-none overflow-y-auto"
             >
               <SheetHeader className="p-6 border-b border-zinc-900 text-left">
                 <SheetTitle className="font-display text-lg font-bold tracking-widest text-zinc-100">
@@ -138,7 +144,65 @@ export default function Header() {
                       {link.label}
                     </Link>
                   ))}
+
+                  {/* ✅ Profile Toggle Section added under Contact */}
+                  {user && (
+                    <>
+                      <button
+                        onClick={() =>
+                          setShowProfileDetails(!showProfileDetails)
+                        }
+                        className={cn(
+                          "w-full flex justify-between items-center px-6 py-5 text-sm uppercase tracking-widest border-b border-zinc-900 transition-colors",
+                          showProfileDetails
+                            ? "text-[#FF6B00] bg-zinc-900/30"
+                            : "text-zinc-500 hover:text-white"
+                        )}
+                      >
+                        Profile
+                        {showProfileDetails ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </button>
+
+                      {showProfileDetails && (
+                        <div className="bg-zinc-950 border-b border-zinc-900 animate-in slide-in-from-top-2 duration-200">
+                          <div className="px-8 py-5 space-y-4">
+                            <div>
+                              <p className="text-[10px] uppercase text-zinc-600 font-black tracking-widest">
+                                Authorized User
+                              </p>
+                              <p className="text-xs text-white truncate font-medium mt-1">
+                                {user.email}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-col gap-4">
+                              <Link
+                                href="/orders"
+                                className="text-xs uppercase tracking-tighter text-zinc-400 hover:text-[#FF6B00]"
+                              >
+                                Orders
+                              </Link>
+
+                              {user.email === ADMIN_EMAIL && (
+                                <Link
+                                  href="/admin"
+                                  className="text-xs uppercase tracking-tighter text-[#FF6B00]"
+                                >
+                                  System Control
+                                </Link>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </nav>
+
                 <div className="mt-auto p-6 flex flex-col gap-3">
                   {!user ? (
                     <Link href="/login" className="w-full">
@@ -185,10 +249,9 @@ export default function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-zinc-400 hover:text-[#FF6B00] hover:bg-zinc-900 rounded-none relative" // ✅ Added relative
+              className="text-zinc-400 hover:text-[#FF6B00] hover:bg-zinc-900 rounded-none relative"
             >
               <ShoppingCart className="h-4 w-4" />
-              {/* ✅ Desktop Cart Indicator */}
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-[#FF6B00] text-black text-[9px] font-black h-4 w-4 flex items-center justify-center border border-black leading-none">
                   {cartCount}

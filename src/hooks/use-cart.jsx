@@ -13,7 +13,6 @@ import { useToast } from "./use-toast";
 import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-// Cyber-Industrial Debounce Protocol
 const debounce = (func, wait) => {
   let timeout;
   return (...args) => {
@@ -24,7 +23,6 @@ const debounce = (func, wait) => {
 
 const CartContext = createContext(undefined);
 
-// State Comparison Protocol
 const cartItemsEqual = (items1, items2) => {
   if (items1.length !== items2.length) return false;
   return items1.every((item1, index) => {
@@ -50,7 +48,6 @@ export const CartProvider = ({ children }) => {
     currentUserRef.current = user;
   }, [user]);
 
-  // Calculations
   const subtotal = cartItems.reduce((acc, item) => {
     const price = item.discountedPrice ?? item.price;
     return acc + price * item.quantity;
@@ -58,7 +55,6 @@ export const CartProvider = ({ children }) => {
   const shipping = cartItems.length > 0 ? 0 : 0;
   const total = subtotal + shipping;
 
-  // Immediate Sync to Central Network
   const saveCartImmediately = useCallback(async (items) => {
     if (currentUserRef.current) {
       try {
@@ -75,14 +71,12 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // Core Load Logic: Prevents stale/cached data leaks
   const loadCart = useCallback(
     async (isUserChange = false) => {
       if (authLoading) return;
 
       try {
         setIsLoading(true);
-        // CRITICAL: Immediate state purge on user transition to prevent ghost data
         if (isUserChange) setCartItems([]);
 
         if (user) {
@@ -94,26 +88,12 @@ export const CartProvider = ({ children }) => {
             const firestoreItems = cartSnap.data().items || [];
             setCartItems(firestoreItems);
           } else {
-            // New Unit: Check for migration payload
-            if (!isUserChange) {
-              const localCart = localStorage.getItem("cart");
-              if (localCart) {
-                const localItems = JSON.parse(localCart);
-                console.log("[MIGRATE] Injecting local payload to cloud");
-                setCartItems(localItems);
-                await saveCartImmediately(localItems);
-                localStorage.removeItem("cart");
-              }
-            } else {
-              console.log("[INIT] Fresh identity detected. Manifest empty.");
-              setCartItems([]);
-            }
+            console.log("[INIT] Fresh identity detected. Manifest empty.");
+            setCartItems([]);
           }
         } else {
-          // Anonymous Unit
-          const localCart = localStorage.getItem("cart");
-          const items = localCart ? JSON.parse(localCart) : [];
-          setCartItems(items);
+          // ✅ REMOVED LocalStorage migration logic
+          setCartItems([]);
         }
 
         hasLoadedOnce.current = true;
@@ -125,10 +105,9 @@ export const CartProvider = ({ children }) => {
         setIsLoading(false);
       }
     },
-    [user?.uid, authLoading, saveCartImmediately]
+    [user?.uid, authLoading]
   );
 
-  // Lifecycle: Auth Ready
   useEffect(() => {
     if (!authLoading && !hasLoadedOnce.current) {
       previousUserIdRef.current = user?.uid || null;
@@ -136,12 +115,10 @@ export const CartProvider = ({ children }) => {
     }
   }, [authLoading, loadCart]);
 
-  // Lifecycle: Identity Switch
   useEffect(() => {
     if (!authLoading && hasLoadedOnce.current) {
       const currentUserId = user?.uid || null;
       if (currentUserId !== previousUserIdRef.current) {
-        console.log("[SYSTEM] Identity shift detected. Re-initializing...");
         setInitialized(false);
         previousUserIdRef.current = currentUserId;
         loadCart(true);
@@ -149,16 +126,13 @@ export const CartProvider = ({ children }) => {
     }
   }, [user?.uid, authLoading, loadCart]);
 
-  // Real-time Cloud Synchronization
   useEffect(() => {
     if (unsubscribeRef.current) unsubscribeRef.current();
-
     if (!user || !initialized || authLoading) return;
 
     const cartRef = doc(db, "carts", user.uid);
     unsubscribeRef.current = onSnapshot(cartRef, (doc) => {
       if (isUpdatingFromFirestore.current) return;
-
       if (doc.exists()) {
         const firestoreItems = doc.data().items || [];
         setCartItems((prevItems) => {
@@ -175,7 +149,6 @@ export const CartProvider = ({ children }) => {
     };
   }, [user?.uid, initialized, authLoading]);
 
-  // Debounced Save Protocol
   const saveCartToFirestore = useCallback(
     debounce(async (items) => {
       if (currentUserRef.current && initialized && !authLoading) {
@@ -190,15 +163,12 @@ export const CartProvider = ({ children }) => {
     [initialized, authLoading]
   );
 
-  // Sync state to local/cloud on change
   useEffect(() => {
     if (!initialized || authLoading) return;
-
     if (user) {
       saveCartToFirestore(cartItems);
-    } else {
-      localStorage.setItem("cart", JSON.stringify(cartItems));
     }
+    // ✅ REMOVED LocalStorage save logic
   }, [cartItems, user, initialized, authLoading, saveCartToFirestore]);
 
   const addToCart = useCallback((product) => {
@@ -232,21 +202,13 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = useCallback(async () => {
     try {
-      // 1. Clear local UI state immediately
       setCartItems([]);
-
-      // 2. Clear Cloud Storage if user is authenticated
       if (currentUserRef.current) {
         const cartRef = doc(db, "carts", currentUserRef.current.uid);
-        // We overwrite the document with an empty items array
         await setDoc(cartRef, { items: [] }, { merge: true });
       }
-
-      // 3. Clear Local Browser Storage
+      // ✅ Force a storage purge just in case
       localStorage.removeItem("cart");
-
-      // 4. Force session storage clear to prevent tracker interference
-      sessionStorage.clear();
     } catch (error) {
       console.error("CRITICAL_ERR: Failed to purge manifest", error);
     }

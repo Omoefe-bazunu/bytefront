@@ -9,6 +9,7 @@ import {
   Globe,
   ShieldCheck,
   Truck,
+  Lock,
 } from "lucide-react";
 import {
   Card,
@@ -20,15 +21,33 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/use-cart";
+import { useAuth } from "@/hooks/use-auth"; // ✅ Added auth hook
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 export function ProductCard({ product, className }) {
   const { addToCart } = useCart();
+  const { user } = useAuth(); // ✅ Get user state
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // ✅ GATEKEEPER: Check for authentication
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: "Please login to add to your cart.",
+        className:
+          "bg-red-600 text-white border-none rounded-none uppercase text-[10px]",
+      });
+      router.push("/login");
+      return;
+    }
+
     addToCart(product);
     toast({
       title: "Cart Updated",
@@ -57,7 +76,7 @@ export function ProductCard({ product, className }) {
           />
         </Link>
 
-        {/* Dynamic Status Badges */}
+        {/* Status Badges */}
         <div className="absolute top-0 left-0 flex flex-col items-start">
           {product.isNew && (
             <div className="bg-white text-black text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1.5 border-b border-r border-black">
@@ -83,14 +102,17 @@ export function ProductCard({ product, className }) {
             className="bg-white text-black hover:bg-[#FF6B00] hover:text-white rounded-none font-black text-[9px] uppercase tracking-widest px-4 py-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
             onClick={handleAddToCart}
           >
-            <Plus className="mr-1.5 h-3 w-3" /> Add to Cart
+            {user ? (
+              <Plus className="mr-1.5 h-3 w-3" />
+            ) : (
+              <Lock className="mr-1.5 h-3 w-3" />
+            )}
+            {user ? "Add to Cart" : "Login to Add"}
           </Button>
         </div>
       </CardHeader>
 
-      {/* --- HARDWARE SPECIFICATIONS (CONTENT) --- */}
       <CardContent className="p-6 flex-grow space-y-4">
-        {/* Brand & Category */}
         <div className="flex items-center gap-2">
           <Cpu className="h-3 w-3 text-zinc-700" />
           <p className="text-[10px] text-zinc-600 font-black uppercase tracking-widest">
@@ -104,7 +126,6 @@ export function ProductCard({ product, className }) {
           </CardTitle>
         </Link>
 
-        {/* Technical Logistics Data */}
         <div className="grid grid-cols-1 gap-2 pt-2 border-t border-zinc-900/50">
           <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-zinc-500">
             <Globe className="h-3 w-3 text-[#FF6B00]/60" />
@@ -127,7 +148,6 @@ export function ProductCard({ product, className }) {
         </div>
       </CardContent>
 
-      {/* --- PRICING MATRIX (FOOTER) --- */}
       <CardFooter className="p-6 pt-0 flex justify-between items-end">
         <div className="space-y-1">
           {product.discountedPrice ? (
@@ -157,7 +177,6 @@ export function ProductCard({ product, className }) {
         </Button>
       </CardFooter>
 
-      {/* Bottom Visual Terminal Bar */}
       <div className="h-1 w-full bg-zinc-900">
         <div className="h-full bg-[#FF6B00] w-0 group-hover:w-full transition-all duration-700 ease-in-out" />
       </div>

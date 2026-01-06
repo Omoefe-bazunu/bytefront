@@ -34,7 +34,7 @@ export function ProductCard({ product, className }) {
       title: "Cart Updated",
       description: `${product.name} added to cart.`,
       className:
-        "bg-[#FF6B00] text-black border-none rounded-none font-black uppercase text-[10px]",
+        "bg-white text-black border-none rounded-none font-black uppercase text-[10px]",
     });
   };
 

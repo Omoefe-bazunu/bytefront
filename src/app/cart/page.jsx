@@ -44,17 +44,23 @@ export default function CartPage() {
 
   // --- PURGE PROTOCOL ---
   // Run this once to clear the "Ghost" data from your old project
+  // inside CartPage.jsx component
   const handlePurge = async () => {
+    // Use a hard confirmation to ensure the user wants to wipe everything
     if (
       window.confirm(
-        "CAUTION: This will wipe all local and cloud cart data to remove legacy products. Proceed?"
+        "INITIATE_SYSTEM_PURGE? All local and cloud data packets will be destroyed."
       )
     ) {
+      // Call the absolute clearCart logic
       await clearCart();
-      localStorage.removeItem("cart");
+
+      // Force a hard browser reload to dump any memory-cached objects from the old project
+      window.location.reload();
+
       toast({
-        title: "System Flushed",
-        description: "Legacy data packets have been purged.",
+        title: "PROTOCOL: PURGED",
+        description: "Legacy project artifacts removed.",
         className:
           "bg-[#FF6B00] text-black border-none rounded-none font-black uppercase text-[10px]",
       });

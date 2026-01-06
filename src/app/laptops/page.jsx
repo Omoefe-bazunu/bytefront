@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 export default function LaptopsPage() {
-  useVisitorTracker("Service: Web Development");
+  useVisitorTracker("Service: Laptops");
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);

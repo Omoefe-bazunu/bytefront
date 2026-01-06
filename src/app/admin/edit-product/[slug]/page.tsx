@@ -41,7 +41,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2, Upload } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -53,6 +53,7 @@ import {
 import type { Product } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
 const formSchema = z.object({
   name: z.string().min(3, "Product name is required"),
@@ -272,7 +273,17 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12 md:py-20">
+    <div className="container mx-auto px-4 py-12 md:py-8">
+      <div className=" mx-auto max-w-4xl">
+        <Link
+          href="/admin"
+          className="inline-flex items-center text-center w-full mx-auto gap-2 mb-10 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-[#FF6B00] transition-colors group"
+        >
+          <ArrowLeft className="h-3 w-3 group-hover:-translate-x-1 transition-transform" />
+          RETURN_TO_ADMIN_CONTROL
+        </Link>
+      </div>
+
       <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl font-headline">Edit Product</CardTitle>

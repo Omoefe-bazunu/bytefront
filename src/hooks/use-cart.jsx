@@ -231,13 +231,26 @@ export const CartProvider = ({ children }) => {
   }, []);
 
   const clearCart = useCallback(async () => {
-    setCartItems([]);
-    if (currentUserRef.current) {
-      await saveCartImmediately([]);
-    } else {
+    try {
+      // 1. Clear local UI state immediately
+      setCartItems([]);
+
+      // 2. Clear Cloud Storage if user is authenticated
+      if (currentUserRef.current) {
+        const cartRef = doc(db, "carts", currentUserRef.current.uid);
+        // We overwrite the document with an empty items array
+        await setDoc(cartRef, { items: [] }, { merge: true });
+      }
+
+      // 3. Clear Local Browser Storage
       localStorage.removeItem("cart");
+
+      // 4. Force session storage clear to prevent tracker interference
+      sessionStorage.clear();
+    } catch (error) {
+      console.error("CRITICAL_ERR: Failed to purge manifest", error);
     }
-  }, [saveCartImmediately]);
+  }, []);
 
   return (
     <CartContext.Provider

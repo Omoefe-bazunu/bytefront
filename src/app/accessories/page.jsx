@@ -122,7 +122,7 @@ export default function AccessoriesPage() {
       <main className="container max-w-screen-xl px-4 py-16 mx-auto">
         <div className="grid md:grid-cols-4 gap-12 items-start">
           {/* --- FILTER PROTOCOLS (SIDEBAR) --- */}
-          <aside className="md:col-span-1 space-y-8 sticky top-32">
+          <aside className="md:col-span-1 space-y-8 ">
             <div className="flex items-center gap-3 mb-6">
               <div className="h-6 w-1 bg-[#FF6B00]" />
               <h2 className="font-display text-xl font-bold uppercase tracking-tight italic text-white">

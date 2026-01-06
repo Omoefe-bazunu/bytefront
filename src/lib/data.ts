@@ -12,29 +12,28 @@ export const faqItems: FaqItem[] = [
   {
     question: "Where do your laptops and accessories come from?",
     answer:
-      "All laptops and accessories are sourced and tested from verified Chinese suppliers through our local importation partners (Sure Imports) to ensure they meet our quality standards before we ship to your location.",
+      "Our hardware is sourced from two primary hubs: China and Nigeria. Laptops from China are sourced through our local importation partners (Sure Imports), while our Nigerian stock is sourced directly from our verified Lagos supplier (Reloaded Tech) to ensure high-standard UK-used quality.",
   },
   {
-    question: "Are the laptops and Accessories brand new?",
+    question: "Are the laptops and accessories brand new?",
     answer:
-      "The laptops are pre-owned and not brand new, but are refurbished by the Chinese suppliers in their factories to function and look like a brand new laptop with zero defects. The accessories on the other hand are brand new, unused, and come in their original packaging with all manufacturer seals intact.",
+      "Laptops from our China suppliers are professionally refurbished to function and look brand new with zero defects. Laptops from our Lagos suppliers are premium UK-used units. All accessories, however, are 100% brand new, unused, and come in their original factory-sealed packaging.",
   },
   {
     question: "How long does delivery take?",
     answer:
-      "All our laptops and accessories take 10 business days to get to our Lagos Office from China. Then nationwide delivery typically takes 1-2 working days depending on your location. Delivery is free for all orders regardless of your location in Nigeria.",
+      "Delivery timelines depend on the source of the unit. Laptops from China take 10 days to reach our Lagos office, then 1-2 working days to reach your location. Laptops from our Lagos suppliers are delivered within 1-2 working days nationwide. Shipping is free for all orders regardless of your location in Nigeria.",
   },
   {
     question: "Do you offer a warranty?",
     answer:
-      "Yes, all laptops and accessories from our China suppliers come with a 90 days (3 months) Warranty.",
+      "Yes, we provide technical coverage for all units. Laptops from our China suppliers come with a 90-day (3-month) warranty. Laptops sourced from our Lagos suppliers come with a 1-month warranty.",
   },
   {
     question: "Can I pay on delivery?",
     answer:
-      "We currently do not support pay-on-delivery. We accept secure online payment transfer to our Parent Company Account (HIGH-ER ENTERPRISES) to ensure your transaction is safe. You can always query a transaction from our contact page or via WhatsApp. We will be sure to respond within 24 hours.",
+      "We currently do not support pay-on-delivery. We accept secure online payment transfers to our Parent Company Account (HIGH-ER ENTERPRISES) to ensure your transaction is safe. You can always query a transaction from our contact page or via WhatsApp, and we will respond in 30 minutes or less.",
   },
-
   {
     question: "How do I contact ByteFront?",
     answer:

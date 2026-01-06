@@ -169,7 +169,10 @@ export default function AdminPage() {
                   Inventory_Manifest
                 </CardTitle>
                 <CardDescription className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">
-                  Total Product in Inventory
+                  Total Product in Inventory |{" "}
+                  <span className="text-[#FF6B00] text-[12px] font-black">
+                    {products.length}
+                  </span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">

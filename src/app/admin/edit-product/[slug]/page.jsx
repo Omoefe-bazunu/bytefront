@@ -1,4 +1,3 @@
-// src/app/admin/edit-product/[slug]/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -41,7 +40,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Loader2, Trash2, Upload } from "lucide-react";
+import {
+  ArrowLeft,
+  Loader2,
+  Trash2,
+  Upload,
+  Globe,
+  ShieldCheck,
+  Truck,
+} from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -50,7 +57,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Product } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
@@ -62,13 +68,16 @@ const formSchema = z.object({
   discountedPrice: z.coerce.number().optional(),
   brand: z.string().min(2, "Brand is required"),
   category: z.enum(["Laptops", "Smartphones", "Accessories"]),
+  supplierSource: z.enum(["China", "Nigeria"]), // ✅ Added
+  warranty: z.string().min(2, "Warranty info is required"), // ✅ Added
+  noShippingFee: z.boolean().default(true), // ✅ Added
   aiHint: z.string().min(2, "AI hint is required"),
   specs: z.string().min(10, "At least one specification is required"),
   isFeatured: z.boolean().default(false),
   isNew: z.boolean().default(false),
 });
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = [
   "image/jpeg",
   "image/jpg",
@@ -82,14 +91,14 @@ export default function EditProductPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState(null);
 
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  const [imageUrls, setImageUrls] = useState([]);
+  const [newImageFiles, setNewImageFiles] = useState([]);
 
   const productId = Array.isArray(params.slug) ? params.slug[0] : params.slug;
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -98,6 +107,9 @@ export default function EditProductPage() {
       discountedPrice: undefined,
       brand: "",
       category: "Laptops",
+      supplierSource: "China",
+      warranty: "",
+      noShippingFee: true,
       aiHint: "",
       specs: "",
       isFeatured: false,
@@ -110,33 +122,41 @@ export default function EditProductPage() {
 
     const fetchProduct = async () => {
       setPageLoading(true);
-      const docRef = doc(db, "products", productId);
-      const docSnap = await getDoc(docRef);
+      try {
+        const docRef = doc(db, "products", productId);
+        const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        const productData = { id: docSnap.id, ...docSnap.data() } as Product;
-        setProduct(productData);
-        setImageUrls(productData.images || []);
+        if (docSnap.exists()) {
+          const productData = { id: docSnap.id, ...docSnap.data() };
+          setProduct(productData);
+          setImageUrls(productData.images || []);
 
-        form.reset({
-          ...productData,
-          discountedPrice: productData.discountedPrice ?? undefined,
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Product not found.",
-        });
-        router.push("/admin");
+          form.reset({
+            ...productData,
+            discountedPrice: productData.discountedPrice ?? undefined,
+            supplierSource: productData.supplierSource || "China",
+            warranty: productData.warranty || "",
+            noShippingFee: productData.noShippingFee ?? true,
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Product not found.",
+          });
+          router.push("/admin");
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+      } finally {
+        setPageLoading(false);
       }
-      setPageLoading(false);
     };
 
     fetchProduct();
   }, [productId, form, router, toast]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       files.forEach((file) => {
@@ -161,29 +181,22 @@ export default function EditProductPage() {
     }
   };
 
-  const removeNewImage = (index: number) => {
+  const removeNewImage = (index) => {
     setNewImageFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const removeExistingImage = async (index: number) => {
+  const removeExistingImage = async (index) => {
     const imageUrlToRemove = imageUrls[index];
     try {
       const imageRef = ref(storage, imageUrlToRemove);
       await deleteObject(imageRef);
-    } catch (error: any) {
-      if (error.code !== "storage/object-not-found") {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to delete existing image from storage.",
-        });
-        return;
-      }
+    } catch (error) {
+      console.warn("Storage delete failed or file missing.");
     }
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values) => {
     if (!product) return;
     setLoading(true);
 
@@ -207,89 +220,63 @@ export default function EditProductPage() {
       );
 
       const finalImageUrls = [...imageUrls, ...newUploadedUrls];
-
       const productRef = doc(db, "products", product.id);
 
-      const docData: any = {
-        name: values.name,
-        description: values.description,
-        price: values.price,
-        brand: values.brand,
-        category: values.category,
-        aiHint: values.aiHint,
-        specs: values.specs,
-        isFeatured: values.isFeatured,
-        isNew: values.isNew,
+      const docData = {
+        ...values,
         images: finalImageUrls,
-        createdAt: product.createdAt,
         updatedAt: serverTimestamp(),
       };
 
-      // Handle discountedPrice explicitly
-      if (values.discountedPrice && values.discountedPrice > 0) {
-        docData.discountedPrice = values.discountedPrice;
-      } else {
-        docData.discountedPrice = deleteField(); // Remove the field if empty or invalid
+      if (!values.discountedPrice || values.discountedPrice <= 0) {
+        docData.discountedPrice = deleteField();
       }
 
       await updateDoc(productRef, docData);
 
-      toast({
-        title: "Success!",
-        description: "Product has been updated successfully.",
-      });
+      toast({ title: "Success!", description: "Product updated." });
       router.push("/admin");
-    } catch (error: any) {
+    } catch (error) {
       toast({
         variant: "destructive",
-        title: "Operation Failed",
-        description: error.message || "An unexpected error occurred.",
+        title: "Failed",
+        description: error.message,
       });
     } finally {
       setLoading(false);
     }
   };
+
   if (pageLoading) {
     return (
       <div className="container mx-auto px-4 py-12 md:py-20">
-        <Card className="w-full max-w-4xl mx-auto">
-          <CardHeader>
-            <Skeleton className="h-8 w-1/2" />
-            <Skeleton className="h-4 w-3/4" />
-          </CardHeader>
-          <CardContent className="space-y-8">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-24 w-full" />
-            <div className="grid grid-cols-2 gap-8">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-            <Skeleton className="h-40 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </CardContent>
-        </Card>
+        <Skeleton className="h-[600px] w-full max-w-4xl mx-auto rounded-none bg-zinc-900" />
       </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-8">
-      <div className=" mx-auto max-w-4xl">
+      <div className="mx-auto max-w-4xl">
         <Link
           href="/admin"
-          className="inline-flex items-center text-center w-full mx-auto gap-2 mb-10 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-[#FF6B00] transition-colors group"
+          className="inline-flex items-center gap-2 mb-10 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-[#FF6B00] transition-colors group"
         >
           <ArrowLeft className="h-3 w-3 group-hover:-translate-x-1 transition-transform" />
           RETURN_TO_ADMIN_CONTROL
         </Link>
       </div>
 
-      <Card className="w-full max-w-4xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl font-headline">Edit Product</CardTitle>
-          <CardDescription>Update the details of the product.</CardDescription>
+      <Card className="w-full max-w-4xl mx-auto border-2 border-zinc-900 rounded-none shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
+        <CardHeader className="border-b border-zinc-900 bg-zinc-950">
+          <CardTitle className="text-3xl font-display font-black uppercase italic">
+            Edit <span className="text-[#FF6B00]">Product</span>
+          </CardTitle>
+          <CardDescription className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+            System Protocol: Hardware Configuration Update
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-8">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
@@ -297,11 +284,13 @@ export default function EditProductPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Name</FormLabel>
+                    <FormLabel className="text-[10px] uppercase font-black tracking-widest text-zinc-500">
+                      Product Name
+                    </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g., StellarBook Pro 15"
                         {...field}
+                        className="rounded-none border-zinc-800 focus:border-[#FF6B00]"
                       />
                     </FormControl>
                     <FormMessage />
@@ -314,12 +303,13 @@ export default function EditProductPage() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel className="text-[10px] uppercase font-black tracking-widest text-zinc-500">
+                      Description
+                    </FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Describe the product..."
                         {...field}
-                        className="min-h-[150px]"
+                        className="min-h-[150px] rounded-none border-zinc-800 focus:border-[#FF6B00]"
                       />
                     </FormControl>
                     <FormMessage />
@@ -333,9 +323,15 @@ export default function EditProductPage() {
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price (NGN)</FormLabel>
+                      <FormLabel className="text-[10px] uppercase font-black tracking-widest text-zinc-500">
+                        Price (NGN)
+                      </FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="850000" {...field} />
+                        <Input
+                          type="number"
+                          {...field}
+                          className="rounded-none border-zinc-800 focus:border-[#FF6B00]"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -346,14 +342,68 @@ export default function EditProductPage() {
                   name="discountedPrice"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Discounted Price (Optional)</FormLabel>
+                      <FormLabel className="text-[10px] uppercase font-black tracking-widest text-zinc-500">
+                        Discounted Price
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="825000"
                           {...field}
                           value={field.value ?? ""}
-                          onChange={field.onChange}
+                          className="rounded-none border-zinc-800 focus:border-[#FF6B00]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* LOGISTICS BLOCK */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 bg-zinc-950 border border-zinc-900 border-dashed">
+                <FormField
+                  control={form.control}
+                  name="supplierSource"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[10px] uppercase font-black tracking-widest text-[#FF6B00] flex items-center gap-2">
+                        <Globe className="h-3 w-3" /> Supplier Source
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="rounded-none border-zinc-800">
+                            <SelectValue placeholder="Select Source" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-black border-zinc-800 rounded-none text-white font-sans">
+                          <SelectItem value="China">
+                            China (Refurbished Factory)
+                          </SelectItem>
+                          <SelectItem value="Nigeria">
+                            Nigeria (Lagos UK-Used)
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="warranty"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[10px] uppercase font-black tracking-widest text-[#FF6B00] flex items-center gap-2">
+                        <ShieldCheck className="h-3 w-3" /> Warranty Duration
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., 90 Days (3 Months)"
+                          {...field}
+                          className="rounded-none border-zinc-800 focus:border-[#FF6B00]"
                         />
                       </FormControl>
                       <FormMessage />
@@ -368,9 +418,14 @@ export default function EditProductPage() {
                   name="brand"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Brand</FormLabel>
+                      <FormLabel className="text-[10px] uppercase font-black tracking-widest text-zinc-500">
+                        Brand
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="Stellar" {...field} />
+                        <Input
+                          {...field}
+                          className="rounded-none border-zinc-800"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -381,21 +436,20 @@ export default function EditProductPage() {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
+                      <FormLabel className="text-[10px] uppercase font-black tracking-widest text-zinc-500">
+                        Category
+                      </FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
+                          <SelectTrigger className="rounded-none border-zinc-800">
+                            <SelectValue />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="bg-black border-zinc-800 rounded-none text-white font-sans">
                           <SelectItem value="Laptops">Laptops</SelectItem>
-                          <SelectItem value="Smartphones">
-                            Smartphones
-                          </SelectItem>
                           <SelectItem value="Accessories">
                             Accessories
                           </SelectItem>
@@ -407,23 +461,29 @@ export default function EditProductPage() {
                 />
               </div>
 
+              {/* IMAGES */}
               <div className="space-y-4">
-                <FormLabel>Product Images</FormLabel>
+                <FormLabel className="text-[10px] uppercase font-black tracking-widest text-zinc-500">
+                  Product Images
+                </FormLabel>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {imageUrls.map((url, index) => (
-                    <div key={url} className="relative group">
+                    <div
+                      key={url}
+                      className="relative group border border-zinc-800 p-1"
+                    >
                       <Image
                         src={url}
-                        alt={`product image ${index + 1}`}
+                        alt="Product"
                         width={150}
                         height={150}
-                        className="w-full h-32 object-cover rounded-md"
+                        className="w-full h-32 object-cover grayscale group-hover:grayscale-0 transition-all"
                       />
                       <Button
                         type="button"
                         variant="destructive"
                         size="icon"
-                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 h-6 w-6 rounded-none opacity-0 group-hover:opacity-100"
                         onClick={() => removeExistingImage(index)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -431,17 +491,20 @@ export default function EditProductPage() {
                     </div>
                   ))}
                   {newImageFiles.map((file, index) => (
-                    <div key={index} className="relative group">
+                    <div
+                      key={index}
+                      className="relative group border border-[#FF6B00]/50 p-1"
+                    >
                       <img
                         src={URL.createObjectURL(file)}
-                        alt={`preview ${index}`}
-                        className="w-full h-32 object-cover rounded-md"
+                        alt="preview"
+                        className="w-full h-32 object-cover"
                       />
                       <Button
                         type="button"
                         variant="destructive"
                         size="icon"
-                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 h-6 w-6 rounded-none"
                         onClick={() => removeNewImage(index)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -450,11 +513,11 @@ export default function EditProductPage() {
                   ))}
                   <Label
                     htmlFor="image-upload"
-                    className="cursor-pointer flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md hover:bg-muted transition-colors"
+                    className="cursor-pointer flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-zinc-800 hover:border-[#FF6B00] transition-colors"
                   >
-                    <Upload className="h-8 w-8 text-muted-foreground" />
-                    <span className="mt-2 text-sm text-muted-foreground">
-                      Upload
+                    <Upload className="h-6 w-6 text-zinc-500" />
+                    <span className="mt-2 text-[10px] uppercase font-bold text-zinc-500">
+                      Add More
                     </span>
                     <Input
                       id="image-upload"
@@ -473,9 +536,14 @@ export default function EditProductPage() {
                 name="aiHint"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>AI Hint for Images</FormLabel>
+                    <FormLabel className="text-[10px] uppercase font-black tracking-widest text-zinc-500">
+                      AI Hint
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., laptop desk" {...field} />
+                      <Input
+                        {...field}
+                        className="rounded-none border-zinc-800"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -487,12 +555,13 @@ export default function EditProductPage() {
                 name="specs"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Specifications</FormLabel>
+                    <FormLabel className="text-[10px] uppercase font-black tracking-widest text-zinc-500">
+                      Specifications
+                    </FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="List product specifications here. Use new lines for each spec. e.g.,&#10;- Display: 15-inch 4K&#10;- Processor: Core i9&#10;- RAM: 32GB"
-                        className="min-h-[150px]"
                         {...field}
+                        className="min-h-[150px] rounded-none border-zinc-800 focus:border-[#FF6B00]"
                       />
                     </FormControl>
                     <FormMessage />
@@ -500,21 +569,21 @@ export default function EditProductPage() {
                 )}
               />
 
-              <div className="flex items-center space-x-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <FormField
                   control={form.control}
                   name="isFeatured"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormItem className="flex items-center space-x-3 space-y-0 border border-zinc-800 p-4">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Featured Product</FormLabel>
-                      </div>
+                      <FormLabel className="text-[10px] uppercase font-black tracking-widest">
+                        Featured
+                      </FormLabel>
                     </FormItem>
                   )}
                 />
@@ -522,16 +591,33 @@ export default function EditProductPage() {
                   control={form.control}
                   name="isNew"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormItem className="flex items-center space-x-3 space-y-0 border border-zinc-800 p-4">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>New Arrival</FormLabel>
-                      </div>
+                      <FormLabel className="text-[10px] uppercase font-black tracking-widest">
+                        New Entry
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="noShippingFee"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center space-x-3 space-y-0 border border-zinc-900 bg-zinc-950 p-4 border-dashed">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel className="text-[10px] uppercase font-black tracking-widest text-[#FF6B00] flex items-center gap-2">
+                        <Truck className="h-3 w-3" /> Free Shipping
+                      </FormLabel>
                     </FormItem>
                   )}
                 />
@@ -539,13 +625,13 @@ export default function EditProductPage() {
 
               <Button
                 type="submit"
-                className="w-full btn-gradient"
+                className="w-full h-14 bg-[#FF6B00] hover:bg-white text-black rounded-none font-display text-xl font-black uppercase italic transition-all disabled:grayscale"
                 disabled={loading}
               >
                 {loading ? (
-                  <Loader2 className="animate-spin" />
+                  <Loader2 className="animate-spin h-6 w-6" />
                 ) : (
-                  "Update Product"
+                  "Commit Changes"
                 )}
               </Button>
             </form>

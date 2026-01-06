@@ -107,7 +107,7 @@ export default function SignupPage() {
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="identity@protocol.com"
+                        placeholder="user@gmail.com"
                         {...field}
                         className="bg-black border-zinc-800 rounded-none focus:border-[#FF6B00] focus:ring-0 transition-all text-white h-12 font-mono text-sm"
                       />
@@ -163,7 +163,7 @@ export default function SignupPage() {
                   {loading ? (
                     <Loader2 className="animate-spin h-4 w-4" />
                   ) : (
-                    "Register Identity"
+                    "Create Account"
                   )}
                 </Button>
 
@@ -191,7 +191,7 @@ export default function SignupPage() {
           {/* Footer Navigation */}
           <div className="mt-8 pt-8 border-t border-zinc-900 flex flex-col items-center space-y-4">
             <p className="text-[10px] text-zinc-600 uppercase font-bold tracking-widest">
-              Existing Identity?{" "}
+              Already Signed Up?{" "}
               <Link
                 href="/login"
                 className="text-[#FF6B00] hover:text-white transition-colors"

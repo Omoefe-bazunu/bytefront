@@ -140,11 +140,11 @@ export default function Footer() {
         {/* Footer Bottom / Meta */}
         <div className="mt-16 pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-700 font-bold">
-            &copy; {currentYear} BYTEFRONT GADGETS. SYSTEM VERSION 1.0.4
+            &copy; {currentYear} BYTEFRONT GADGETS.
           </p>
           <div className="flex gap-6">
             <span className="text-[10px] uppercase text-zinc-800 font-black tracking-widest">
-              Lagos, Nigeria
+              Delta State, Nigeria
             </span>
             <span className="text-[10px] uppercase text-zinc-800 font-black tracking-widest">
               Global Sourcing

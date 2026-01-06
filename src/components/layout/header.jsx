@@ -53,7 +53,7 @@ export default function Header() {
   const { toast } = useToast();
   const [scrolled, setScrolled] = useState(false);
   const [showProfileDetails, setShowProfileDetails] = useState(false);
-  const [isSheetOpen, setIsSheetOpen] = useState(false); // ✅ Added state to control mobile menu
+  const [isSheetOpen, setIsSheetOpen] = useState(false); // ✅ Controlled state for mobile menu
 
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -115,8 +115,6 @@ export default function Header() {
             </Button>
           </Link>
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            {" "}
-            {/* ✅ Controlled Sheet */}
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="text-zinc-400">
                 <Menu className="h-6 w-6" />
@@ -150,7 +148,6 @@ export default function Header() {
                     </Link>
                   ))}
 
-                  {/* ✅ Profile Toggle Section added under Contact */}
                   {user && (
                     <>
                       <button
@@ -187,7 +184,7 @@ export default function Header() {
                             <div className="flex flex-col gap-4">
                               <Link
                                 href="/orders"
-                                onClick={() => setIsSheetOpen(false)} // ✅ Close on click
+                                onClick={() => setIsSheetOpen(false)}
                                 className="text-xs uppercase tracking-tighter text-zinc-400 hover:text-[#FF6B00]"
                               >
                                 Orders
@@ -196,7 +193,7 @@ export default function Header() {
                               {user.email === ADMIN_EMAIL && (
                                 <Link
                                   href="/admin"
-                                  onClick={() => setIsSheetOpen(false)} // ✅ Close on click
+                                  onClick={() => setIsSheetOpen(false)}
                                   className="text-xs uppercase tracking-tighter text-[#FF6B00]"
                                 >
                                   System Control
@@ -208,27 +205,26 @@ export default function Header() {
                       )}
                     </>
                   )}
-                </nav>
 
-                <div className="mt-auto p-6 flex flex-col gap-3">
-                  {!user ? (
-                    <Link href="/login" onClick={() => setIsSheetOpen(false)}>
-                      {" "}
-                      {/* ✅ Close on click */}
-                      <Button className="w-full bg-white text-black hover:bg-[#FF6B00] hover:text-white transition-colors rounded-none font-bold tracking-widest uppercase text-xs">
-                        Sign In
+                  {/* ✅ Auth links moved here: Immediately after Profile */}
+                  <div className="p-6 flex flex-col gap-3 border-b border-zinc-900">
+                    {!user ? (
+                      <Link href="/login" onClick={() => setIsSheetOpen(false)}>
+                        <Button className="w-full bg-white text-black hover:bg-[#FF6B00] hover:text-white transition-colors rounded-none font-bold tracking-widest uppercase text-xs">
+                          Sign In
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        onClick={handleLogout}
+                        className="border-zinc-800 text-zinc-400 rounded-none uppercase text-xs tracking-widest hover:border-[#FF6B00] hover:text-[#FF6B00]"
+                      >
+                        Sign Out
                       </Button>
-                    </Link>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      onClick={handleLogout}
-                      className="border-zinc-800 text-zinc-400 rounded-none uppercase text-xs tracking-widest hover:border-[#FF6B00] hover:text-[#FF6B00]"
-                    >
-                      Sign Out
-                    </Button>
-                  )}
-                </div>
+                    )}
+                  </div>
+                </nav>
               </div>
             </SheetContent>
           </Sheet>
@@ -261,7 +257,6 @@ export default function Header() {
               className="text-zinc-400 hover:text-[#FF6B00] hover:bg-zinc-900 rounded-none relative"
             >
               <ShoppingCart className="h-4 w-4" />
-              {/* ✅ Desktop Cart Indicator */}
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-[#FF6B00] text-black text-[9px] font-black h-4 w-4 flex items-center justify-center border border-black leading-none">
                   {cartCount}

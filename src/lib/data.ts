@@ -12,7 +12,7 @@ export const faqItems: FaqItem[] = [
   {
     question: "Where do your laptops and accessories come from?",
     answer:
-      "All laptops and accessories are sourced and tested from verified Chinese suppliers through our local importation partners (Sure Imports) to ensure they meet our quality standardsbefore we ship to your location.",
+      "All laptops and accessories are sourced and tested from verified Chinese suppliers through our local importation partners (Sure Imports) to ensure they meet our quality standards before we ship to your location.",
   },
   {
     question: "Are the laptops and Accessories brand new?",

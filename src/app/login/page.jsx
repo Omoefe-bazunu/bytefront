@@ -95,11 +95,11 @@ export default function LoginPage() {
                 render={({ field }) => (
                   <FormItem className="space-y-1">
                     <FormLabel className="text-[10px] uppercase font-black text-zinc-600 tracking-widest">
-                      Identity (Email)
+                      Email Address
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="user@protocol.com"
+                        placeholder="user@gmail.com"
                         {...field}
                         className="bg-black border-zinc-800 rounded-none focus:border-[#FF6B00] focus:ring-0 transition-all text-white h-12 font-mono text-sm"
                       />
@@ -116,7 +116,7 @@ export default function LoginPage() {
                   <FormItem className="space-y-1">
                     <div className="flex justify-between items-end">
                       <FormLabel className="text-[10px] uppercase font-black text-zinc-600 tracking-widest">
-                        Access Key
+                        Password
                       </FormLabel>
                       {/* --- FORGOT PASSWORD PROTOCOL --- */}
                       <Link
@@ -170,7 +170,7 @@ export default function LoginPage() {
 
           <div className="mt-8 pt-8 border-t border-zinc-900 flex flex-col items-center space-y-4">
             <p className="text-[10px] text-zinc-600 uppercase font-bold tracking-widest">
-              Unregistered Identity?{" "}
+              No Account Yet?{" "}
               <Link
                 href="/signup"
                 className="text-[#FF6B00] hover:text-white transition-colors"

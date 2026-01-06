@@ -18,6 +18,8 @@ import {
   Filter,
   ArrowUpRight,
   Monitor,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 export default function LaptopsPage() {
@@ -30,6 +32,10 @@ export default function LaptopsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [priceRange, setPriceRange] = useState([1000000]);
+
+  // --- PAGINATION STATE ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
 
   useEffect(() => {
     const fetchLaptops = async () => {
@@ -93,6 +99,7 @@ export default function LaptopsPage() {
     result = result.filter((product) => product.price <= priceRange[0]);
 
     setFilteredProducts(result);
+    setCurrentPage(1); // ✅ Reset to page 1 on filter application
   };
 
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
@@ -101,6 +108,25 @@ export default function LaptopsPage() {
     setSelectedBrands((prev) =>
       checked ? [...prev, brand] : prev.filter((b) => b !== brand)
     );
+  };
+
+  // --- PAGINATION LOGIC ---
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -235,11 +261,40 @@ export default function LaptopsPage() {
                 ))}
               </div>
             ) : filteredProducts.length > 0 ? (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in duration-700">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              <>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in duration-700">
+                  {currentProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+
+                {/* ✅ PAGINATION CONTROLS */}
+                {totalPages > 1 && (
+                  <div className="mt-16 flex items-center justify-between border-t border-zinc-900 pt-8 font-mono">
+                    <div className="text-[10px] uppercase font-black text-zinc-600 tracking-widest">
+                      Page_Index: {currentPage} / {totalPages}
+                    </div>
+                    <div className="flex gap-4">
+                      <Button
+                        variant="outline"
+                        onClick={goToPrevPage}
+                        disabled={currentPage === 1}
+                        className="rounded-none border-zinc-800 text-[10px] font-black uppercase tracking-widest hover:text-[#FF6B00] hover:border-[#FF6B00] disabled:opacity-30 transition-all"
+                      >
+                        <ChevronLeft className="mr-1 h-3 w-3" /> PREV
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={goToNextPage}
+                        disabled={currentPage === totalPages}
+                        className="rounded-none border-zinc-800 text-[10px] font-black uppercase tracking-widest hover:text-[#FF6B00] hover:border-[#FF6B00] disabled:opacity-30 transition-all"
+                      >
+                        NEXT <ChevronRight className="ml-1 h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-zinc-900">
                 <Cpu className="h-12 w-12 text-zinc-800 mb-4" />
@@ -254,6 +309,7 @@ export default function LaptopsPage() {
                     setSelectedBrands([]);
                     setPriceRange([maxPrice]);
                     setFilteredProducts(products);
+                    setCurrentPage(1);
                   }}
                 >
                   Reset Connection Protocol
